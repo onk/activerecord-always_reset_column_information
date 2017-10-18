@@ -1,6 +1,6 @@
 require "activerecord/always_reset_column_information/version"
-require "activerecord/always_reset_column_information/migrator"
+require "activerecord/always_reset_column_information/migration"
 require "active_record"
 require "active_record/migration"
 
-ActiveRecord::Migrator.prepend Activerecord::AlwaysResetColumnInformation::Migrator
+ActiveRecord::Migration.prepend Activerecord::AlwaysResetColumnInformation::Migration
