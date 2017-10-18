@@ -20,5 +20,13 @@ RSpec.configure do |config|
 end
 
 # test models
+#   directly subclass
 class User < ActiveRecord::Base
+end
+
+#   inherite with ApplcationRecord
+class ApplicationRecord < ActiveRecord::Base
+  self.abstract_class = true
+end
+class Book < ApplicationRecord
 end

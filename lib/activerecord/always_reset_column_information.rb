@@ -15,7 +15,7 @@ module ActiveRecord
         result = runnable.each do |migration|
           execute_migration_in_transaction(migration, @direction)
           # vvvvvvvvv Add this line
-          ActiveRecord::Base.subclasses.each(&:reset_column_information)
+          ActiveRecord::Base.descendants.each(&:reset_column_information)
           # ^^^^^^^^^
         end
 
