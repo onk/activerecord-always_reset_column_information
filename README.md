@@ -1,38 +1,87 @@
 # Activerecord::AlwaysResetColumnInformation
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/activerecord/always_reset_column_information`. To experiment with that code, run `bin/console` for an interactive prompt.
+## What's this
 
-TODO: Delete this and the text above, and describe your gem
+Call `Model.reset_column_information` for each migrations.
 
-## Installation
+## Why `reset_column_information` is needed?
+
+```ruby
+# 001_create_users.rb
+class CreateUsers < ActiveRecord::Migration[5.1]
+  def up
+    create_table :users do |t|
+      t.string :name
+    end
+    p User.first # 1
+  end
+end
+
+# 002_add_age_to_users.rb
+class AddAgeToUsers < ActiveRecord::Migration[5.1]
+  def up
+    add_column :users, :age, :integer  # 2
+    User.create(name: "Taro", age: 16) # 3
+  end
+end
+```
+
+1 Touch `User` model and columns are chaced.
+2 Add column to `users` table. but `User`'s column cache is still keeping.
+3 Create user with new column but raise `ActiveModel::UnknownAttributeError: unknown attribute 'age' for User.`
+
+You can change `002_add_age_to_users.rb` to ensure that creating user.
+
+```diff
+ class AddAgeToUsers < ActiveRecord::Migration[5.1]
+   def up
+     add_column :users, :age, :integer
++    User.reset_column_information
+     User.create(name: "Taro", age: 16)
+   end
+ end
+```
+
+But `Reset after touch` in `001_create_users.rb` is better approach.
+
+```diff
+ class CreateUsers < ActiveRecord::Migration[5.1]
+   def up
+     create_table :users do |t|
+       t.string :name
+     end
+     p User.first
++    User.reset_column_information
+   end
+ end
+```
+
+
+## What does this gem do?
+
+Reset all models for each migrations.
+
+Implementation is only this.
+
+```ruby
+module Activerecord::AlwaysResetColumnInformation::Migration
+  def exec_migration(conn, direction)
+    super
+    ActiveRecord::Base.descendants.each(&:reset_column_information)
+  end
+end
+
+ActiveRecord::Migration.prepend Activerecord::AlwaysResetColumnInformation::Migration
+```
+
+
+## Usage
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'activerecord-always_reset_column_information'
+gem "activerecord-always_reset_column_information"
 ```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install activerecord-always_reset_column_information
-
-## Usage
-
-TODO: Write usage instructions here
-
-## Development
-
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
-
-## Contributing
-
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/activerecord-always_reset_column_information.
 
 ## License
 
