@@ -26,8 +26,8 @@ class AddAgeToUsers < ActiveRecord::Migration[5.1]
 end
 ```
 
-1 Touch `User` model and columns are chaced.
-2 Add column to `users` table. but `User`'s column cache is still keeping.
+1 Touch `User` model and columns are chaced.<br>
+2 Add column to `users` table. but `User`'s column cache is still keeping.<br>
 3 Create user with new column but raise `ActiveModel::UnknownAttributeError: unknown attribute 'age' for User.`
 
 You can change `002_add_age_to_users.rb` to ensure that creating user.
